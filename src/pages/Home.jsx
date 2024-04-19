@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react'
 import axios from "axios"
+import SecureLS from 'secure-ls';
+
+const ls = new SecureLS({ encodingType: 'aes' });
 
 export default function Home() {
   
@@ -9,11 +12,11 @@ export default function Home() {
   useEffect (()=>{
     const checkLoggedInUser = async () =>{
       try{
-        const token = localStorage.getItem("accessToken");
-        if (token) {
+        const accessToken = ls.get("accessToken");
+        if (accessToken) {
           const config = {
             headers: {
-              "Authorization":`Bearer ${token}`
+              "Authorization":`Bearer ${accessToken}`
             }
           };
           const response = await axios.get("http://127.0.0.1:8000/api/user/", config)
@@ -35,8 +38,8 @@ export default function Home() {
 
   const handleLogout = async () => {
     try{
-      const accessToken = localStorage.getItem("accessToken");
-      const refreshToken = localStorage.getItem("refreshToken");
+      const accessToken = ls.get("accessToken");
+      const refreshToken = ls.get("refreshToken");
 
       if(accessToken && refreshToken) {
         const config = {
@@ -45,8 +48,8 @@ export default function Home() {
           }
         };
         await axios.post("http://127.0.0.1:8000/api/logout/", {"refresh":refreshToken}, config)
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
+        ls.remove("accessToken");
+        ls.remove("refreshToken");
         setLoggedIn(false);
         setUsername("");
         console.log("Log out successful!")
@@ -60,7 +63,7 @@ export default function Home() {
     <div>
       {isLoggedIn ? (
         <>
-      <h2>Hi, {username}. Thanks for loggin in!</h2>
+      <h2>Hi, {username}. Thanks for logging in!</h2>
       <button onClick={handleLogout}>Logout</button>
       </>
       ):(

@@ -1,10 +1,11 @@
 import {useState} from 'react';
 import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 export default function Register() {
 	const { register, handleSubmit, formState: { errors, isSubmitting }, getValues } = useForm();
-
+	const navigate = useNavigate();
 	const [isLoading, setIsLoading] = useState(false);
     const [successMessage, setSuccessMessage] = useState(null);
     const [error, setError] = useState(null)
@@ -19,6 +20,9 @@ export default function Register() {
 			const response = await axios.post("http://127.0.0.1:8000/api/register/", data);
 			console.log("Success!", response.data);
 			setSuccessMessage("Registration Successful!")
+			setTimeout(() => {
+				navigate('/login')
+			}, 3000);
 			} catch(error){
             console.log("Error during registration!", error.response?.data);
             if(error.response && error.response.data){

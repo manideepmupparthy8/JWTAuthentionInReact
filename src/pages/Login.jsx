@@ -1,8 +1,13 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import axios from "axios";
+import { useNavigate } from "react-router-dom"; // Import useNavigate hook
+import SecureLS from 'secure-ls';
+
+const ls = new SecureLS({ encodingType: 'aes' });
 
 export default function Login() {
+  const navigate = useNavigate(); // Initialize useNavigate hook
   const { register, handleSubmit, formState: {errors,  isSubmitting } } = useForm();
   const [successMessage, setSuccessMessage] = useState(null);
   const [error, setError] = useState(null)
@@ -12,8 +17,11 @@ export default function Login() {
       const response = await axios.post("http://127.0.0.1:8000/api/login/", formData);
       console.log("Success!", response.data);
       setSuccessMessage("Login Successful!");
-      localStorage.setItem("accessToken", response.data.tokens.access);
-      localStorage.setItem("refreshToken", response.data.tokens.refresh);
+      ls.set('accessToken', response.data.tokens.access);
+      ls.set('refreshToken', response.data.tokens.refresh);
+      setTimeout(() => {
+				navigate('/')
+			}, 3000); // Navigate to Home page upon successful login
     }  catch(error){
       console.log("Error during Login!", error.response?.data);
       if(error.response && error.response.data){
@@ -40,8 +48,8 @@ export default function Login() {
           {...register("email", { required: "Email is required" })}
         />
         <br />
-				{errors.email && <p style={{ color: "red" }}>{errors.email.message}</p>}
-				<br />
+        {errors.email && <p style={{ color: "red" }}>{errors.email.message}</p>}
+        <br />
         <label>Password:</label>
         <br />
         <input
